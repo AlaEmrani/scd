@@ -123,7 +123,6 @@ generate_reference_models <- function(number_of_nodes, number_of_samples,
   #######################################
   ########### Generate Model ############
   #######################################
-  set.seed(0)
   
   # zero matrix generation
   A <- matrix(rep(0,number_of_nodes*number_of_nodes), nrow=number_of_nodes)
