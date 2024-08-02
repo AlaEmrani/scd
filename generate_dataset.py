@@ -17,7 +17,7 @@ def generate_reference_models(number_of_nodes, number_of_samples, number_of_chan
 
 
 def base_differential_network(number_of_nodes, number_of_samples=1, decay_ratio = 0.3, alternative_value = 0.3,
-                              alternate_diag_index = 1.1):
+                              numberOfChanges = 2):
     pandas2ri.activate()
     robjects.r.source('R_codes/Libraray.R')
     r_func = robjects.globalenv['base_differential_network']
