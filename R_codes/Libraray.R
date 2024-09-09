@@ -116,91 +116,77 @@ fisher_test <- function(all_genes, hub_genes, functional_genes) {
 library("GGMselect")
 library("igraph")
 # create two complete precision matrix
-generate_reference_models <- function(numberOfNodes, numberOfSamples,
-                                      type="ScaleFree", densityOfGraph = 0.2,
-                                      power = 1, numberOfChanges, mult=1)
+generate_reference_models <- function(number_of_nodes, number_of_samples,
+                                      type="ScaleFree", density_of_graph = 0.2,
+                                      power = 1, number_of_changes, mult=1)
 {
   #######################################
   ########### Generate Model ############
   #######################################
-  library("GGMselect")
-  library("igraph")
-
+  set.seed(0)
+  
   # zero matrix generation
-  A <- matrix(rep(0,numberOfNodes*numberOfNodes), nrow=numberOfNodes);
-  B <- matrix(rep(0,numberOfNodes*numberOfNodes), nrow=numberOfNodes);
-  totalPossibleEdges <- choose(numberOfNodes, 2);
-
+  A <- matrix(rep(0,number_of_nodes*number_of_nodes), nrow=number_of_nodes)
+  B <- matrix(rep(0,number_of_nodes*number_of_nodes), nrow=number_of_nodes)
+  total_possible_edges <- choose(number_of_nodes, 2)
+  
   # create common model
-  randomWeights <- rnorm(totalPossibleEdges);
-  randomWeights <- randomWeights + mult*sign(randomWeights);
-
-
+  random_weights <- rnorm(total_possible_edges)
+  random_weights <- random_weights + mult*sign(random_weights)
+  
+  
   # define base of precision matrix
-  A[lower.tri(A)] <- randomWeights;
+  A[lower.tri(A)] <- random_weights
   A <- t(A)
-  A[lower.tri(A)] <- randomWeights;
-
-  B <- A;
-
-
-  changeMask <- matrix(data = 0, nrow = numberOfNodes, ncol = numberOfNodes)
-  indexes <- 1:choose(numberOfNodes,2)
-  changeMask[lower.tri(changeMask)] <- indexes
-  changeMask <- t(changeMask)
-  changeMask[lower.tri(changeMask)] <- indexes
-  mask <- sample(indexes,numberOfChanges)
-  changeMask[changeMask %in% mask] <- -1
-  changeMask[changeMask != -1] <- 0
+  A[lower.tri(A)] <- random_weights
+  
+  B <- A
+  
+  
+  change_mask <- matrix(data = 0, nrow = number_of_nodes,
+                        ncol = number_of_nodes)
+  indices <- 1:choose(number_of_nodes,2)
+  change_mask[lower.tri(change_mask)] <- indices
+  change_mask <- t(change_mask)
+  change_mask[lower.tri(change_mask)] <- indices
+  mask <- sample(indices,number_of_changes)
+  change_mask[change_mask %in% mask] <- -1
+  change_mask[change_mask != -1] <- 0
   # create structure
-  if(type == "Full") {
-    A <- A*matrix(1, nrow = numberOfNodes, ncol = numberOfNodes)
-    B <- B*(matrix(1, nrow = numberOfNodes, ncol = numberOfNodes)+changeMask)
-  }  else if(type == "Erdos") {
-    library(igraph)
-    g <- erdos.renyi.game(numberOfNodes, densityOfGraph, loops = F, directed = F)
-    graphMatrix <- as_adjacency_matrix(g, sparse = F);
-    A <- A*graphMatrix;
-    B <- B*(graphMatrix+changeMask);
-  }  else if(type == "ScaleFree") {
-    g <- barabasi.game(numberOfNodes, power, directed = F);
-    graphMatrix <- as_adjacency_matrix(g, sparse = F);
-    A <- A*graphMatrix;
-    B <- B*(graphMatrix+changeMask);
-  } else if(type == "Simple") {
-    for(i in 1:numberOfNodes)
-      for(j in 1:numberOfNodes)
-        A[i,j] = decay_value^(abs(i-j))
-    B = A
-    for(i in 1:numberOfChanges)
-      B[i,numberOfNodes-numberOfChanges+i] = B[numberOfNodes-numberOfChanges+i, i] = decay_value
+  if(type == "ScaleFree") {
+    g <- barabasi.game(number_of_nodes, power, directed = F);
+    graph_matrix <- as_adjacency_matrix(g, sparse = F);
+    A <- A*graph_matrix;
+    B <- B*(graph_matrix+change_mask);
   } else {
     errorCondition(message = "The type value is not standard!")
   }
-
-  if(type != "Simple") {
-    # making positive definite
-    minimumEigenValue <- min(c(eigen(A)$values, eigen(B)$values))
-
-    if(minimumEigenValue < 1)
-    {
-      A <- A + diag(1-minimumEigenValue, nrow = numberOfNodes, ncol = numberOfNodes)
-      B <- B + diag(1-minimumEigenValue, nrow = numberOfNodes, ncol = numberOfNodes)
-    }
+  
+  
+  # making positive definite
+  minimum_eigen_value <- min(c(eigen(A)$values, eigen(B)$values))
+  
+  if(minimum_eigen_value < 1)
+  {
+    A <- A + diag(1-minimum_eigen_value, nrow = number_of_nodes,
+                  ncol = number_of_nodes)
+    B <- B + diag(1-minimum_eigen_value, nrow = number_of_nodes,
+                  ncol = number_of_nodes)
   }
-
-
+  
+  
   #########################################
   ########### Generate Samples ############
   #########################################
-  covarianceMatrixA <- solve(A);
-  XA <- rmvnorm(numberOfSamples, mean=rep(0,numberOfNodes), sigma=covarianceMatrixA);
-
-  covarianceMatrixB <- solve(B);
-  XB <- rmvnorm(numberOfSamples, mean=rep(0,numberOfNodes), sigma=covarianceMatrixB);
-  list(samplesA = XA, precisionMatrixA = A, covarianceMatrixA = covarianceMatrixA,
-       samplesB = XB, precisionMatrixB = B, covarianceMatrixB = covarianceMatrixB);
+  covariance_matrix_A <- solve(A)
+  samples_A <- rmvnorm(number_of_samples, mean=rep(0,number_of_nodes), sigma=covariance_matrix_A)
+  covariance_matrix_B <- solve(B)
+  samples_B <- rmvnorm(number_of_samples, mean=rep(0,number_of_nodes), sigma=covariance_matrix_B)
+  
+  list(samples_A = samples_A, precision_matrix_A = A, covariance_matrix_A = covariance_matrix_A,
+       samples_B = samples_B, precision_matrix_B = B, covariance_matrix_B = covariance_matrix_B)
 }
+
 
 # Estimated differential structure evaluator
 result_evaluator <- function(real_differences, estimated_differences){
@@ -312,15 +298,15 @@ aggregate_dtrace_solution_path_resuts <- function(number_of_repetition,
 base_differential_network <- function(numberOfNodes, numberOfSamples=1,
                                       decay_ratio = 0.3,
                                       alternative_value = 0.3,
-                                      numberOfChanges = 2) {
+                                      alternate_diag_index = 2) {
   SB = SA = matrix(0, nrow = numberOfNodes, ncol = numberOfNodes)
   for (i in 1:numberOfNodes) {
     for (j in 1:numberOfNodes) {
       SB[i,j] = SA[i,j] = decay_ratio^(abs(i-j))
+      if(floor(numberOfNodes/alternate_diag_index) == abs(i-j))
+        SB[i,j] = alternative_value
     }
   }
-    for(i in 1:numberOfChanges)
-      B[i,numberOfNodes-numberOfChanges+i] = B[numberOfNodes-numberOfChanges+i, i] = alternative_value
     covarianceMatrixA <- solve(SA);
     XA <- rmvnorm(numberOfSamples, mean=rep(0,numberOfNodes), sigma=covarianceMatrixA);
 
@@ -330,3 +316,31 @@ base_differential_network <- function(numberOfNodes, numberOfSamples=1,
          samplesB = XB, precisionMatrixB = SB, covarianceMatrixB = covarianceMatrixB);
 }
 
+checker <- function(XA, XB, same_indices, change_indices) {
+  n1 <- nrow(XA)
+  n2 <- nrow(XB)
+  d <- ncol(XA)
+
+  s1 <- t(XA) %*% XA
+  s2 <- t(XB) %*% XB
+
+  s <- s1 + s2
+
+  s1_c <- s1[same_indices, same_indices] - s1[same_indices, change_indices] %*%
+    solve(s1[change_indices, change_indices]) %*% s1[change_indices, same_indices]
+  s2_c <- s2[same_indices, same_indices] - s2[same_indices, change_indices] %*%
+    solve(s2[change_indices, change_indices]) %*% s2[change_indices, same_indices]
+  s_c <- s1_c + s2_c
+
+  n1_c <- n1 - d + length(same_indices)
+  n2_c <- n2 - d + length(same_indices)
+  n_c <- n1_c + n2_c
+
+  a21 <- (n1_c^2) * (sum(diag(s1_c %*% s1_c)) - (sum(diag(s1_c))^2)/n1_c) / ( (n1_c+2) * (n1_c-1) )
+  a22 <- (n2_c^2) * (sum(diag(s2_c %*% s2_c)) - (sum(diag(s2_c))^2)/n2_c) / ( (n2_c+2) * (n2_c-1) )
+  a2 <- (n_c^2) * (sum(diag(s_c %*% s_c)) - (sum(diag(s_c))^2)/n_c) / ( (n_c+2) * (n_c-1) )
+
+  tnm <- ( n1_c*n2_c*(a21 + a22 - 2*sum(diag(s1_c %*% s2_c))) ) / ( 2 * (n1_c + n2_c) * a2 )
+
+  2*pnorm(-abs(tnm), mean = 0, sd = 1)
+}
