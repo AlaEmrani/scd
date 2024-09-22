@@ -317,6 +317,8 @@ base_differential_network <- function(numberOfNodes, numberOfSamples=1,
 }
 
 checker <- function(XA, XB, same_indices, change_indices) {
+  same_indices = same_indices + 1
+  change_indices = change_indices + 1
   n1 <- nrow(XA)
   n2 <- nrow(XB)
   d <- ncol(XA)
@@ -346,6 +348,9 @@ checker <- function(XA, XB, same_indices, change_indices) {
 }
 
 checker_v2 <- function(SA, SB, same_indices, change_indices, repetition=1) {
+  same_indices = same_indices + 1
+  change_indices = change_indices + 1
+  
   nA <- nrow(SA)
   nB <- nrow(SB)
   d <- ncol(SA)
