@@ -351,12 +351,11 @@ checker_v2 <- function(SA, SB, same_indices, change_indices, repetition=1) {
   d <- ncol(SA)
 
   same_length <- length(same_indices)
+  repetition <- repetition*same_length
 
-  min_p.value = 1
+  p <- NULL
   for(i in 1:repetition){
     c <- matrix(rnorm(same_length), ncol = 1)
-    # c <- matrix(rep(1,same_length), ncol = 1)
-    # c[1,1] = 1
 
     data <- rbind(data.frame(y = SA[, same_indices] %*% c,
                              X = SA[, change_indices]),
@@ -365,12 +364,14 @@ checker_v2 <- function(SA, SB, same_indices, change_indices, repetition=1) {
 
     # Load the strucchange package
     library(strucchange)
+    library(poolr)
     # Specify the break point
     breakpoint <- nA
     # Perform the Chow test
     chow_test <- sctest(y ~ ., type = "Chow", point = breakpoint, data = data)
-    if(chow_test$p.value < min_p.value)
-      min_p.value <- chow_test$p.value
+    p <- c(p, chow_test$p.value)
   }
-  min_p.value
+  # meta analysis methods with p-values
+  list(tippet = tippett(p)$p, fisher = fisher(p)$p,
+       invchisq = invchisq(p)$p, stouffer = stouffer(p)$p)
 }
