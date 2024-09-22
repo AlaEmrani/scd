@@ -344,3 +344,33 @@ checker <- function(XA, XB, same_indices, change_indices) {
 
   2*pnorm(-abs(tnm), mean = 0, sd = 1)
 }
+
+checker_v2 <- function(SA, SB, same_indices, change_indices, repetition=1) {
+  nA <- nrow(SA)
+  nB <- nrow(SB)
+  d <- ncol(SA)
+
+  same_length <- length(same_indices)
+
+  min_p.value = 1
+  for(i in 1:repetition){
+    c <- matrix(rnorm(same_length), ncol = 1)
+    # c <- matrix(rep(1,same_length), ncol = 1)
+    # c[1,1] = 1
+
+    data <- rbind(data.frame(y = SA[, same_indices] %*% c,
+                             X = SA[, change_indices]),
+                  data.frame(y = SB[, same_indices] %*% c,
+                             X = SB[, change_indices]))
+
+    # Load the strucchange package
+    library(strucchange)
+    # Specify the break point
+    breakpoint <- nA
+    # Perform the Chow test
+    chow_test <- sctest(y ~ ., type = "Chow", point = breakpoint, data = data)
+    if(chow_test$p.value < min_p.value)
+      min_p.value <- chow_test$p.value
+  }
+  min_p.value
+}
