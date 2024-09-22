@@ -101,6 +101,6 @@ def get_p_value(XA, XB, same_indices, change_indices, repetition=1):
     # Call the R function
     output = r_func(r_XA, r_XB, r_same_indices, r_change_indices, repetition)
 
-    return output[0]
+    return output[0], output[1], output[2], output[3]
 
 
