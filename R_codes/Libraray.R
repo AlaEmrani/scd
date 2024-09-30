@@ -391,29 +391,28 @@ checker_v3 <- function(SA, SB, same_indices, change_indices, repetition=1) {
 
   same_length <- length(same_indices)
   change_length <- length(change_indices)
-  repetition <- repetition*same_length
 
-  min_p.value = 1
-  sum_ln_p = 0
   p.c <- NULL
   p.f <- NULL
-  for(i in 1:repetition){
-    c <- matrix(rnorm(same_length), ncol = 1)
-
-    data <- rbind(data.frame(y = SA[, same_indices] %*% c,
+  for(i in same_indices){
+    data <- rbind(data.frame(y = SA[, i],
                              X = SA[, change_indices]),
-                  data.frame(y = SB[, same_indices] %*% c,
+                  data.frame(y = SB[, i],
                              X = SB[, change_indices]))
 
     # Load the strucchange package
     library(strucchange)
+    library(poolr)
     # Specify the break point
     breakpoint <- nA
-    # Perform the Chow test
-    chow_test <- sctest(y ~ ., type = "Chow", point = breakpoint, data = data)
 
-    OLS_A_residuals <- lm(y ~ ., data = data[1:nA,])$residuals
-    OLS_B_residuals <- lm(y ~ ., data = data[(nA+1):(nA+nB),])$residuals
+    formul <- reformulate(response="y", termlabels=c(colnames(data)[-1], "0"))
+
+    # Perform the Chow test
+    chow_test <- sctest(formul, type = "Chow", point = breakpoint, data = data)
+
+    OLS_A_residuals <- lm(formula = formul, data = data[1:nA,])$residuals
+    OLS_B_residuals <- lm(formula = formul, data = data[(nA+1):(nA+nB),])$residuals
     num = (t(OLS_A_residuals) %*% OLS_A_residuals)/(nA-change_length)
     denom = (t(OLS_B_residuals) %*% OLS_B_residuals)/(nB-change_length)
     f = num/denom
@@ -429,9 +428,10 @@ checker_v3 <- function(SA, SB, same_indices, change_indices, repetition=1) {
     p.c <- c(p.c, chow_test$p.value)
     p.f <- c(p.f, p.v)
   }
+
   # meta analysis methods with p-values
-  list(tippet = min(tippett(p.c)$p, tippett(p.v)$p),
-       fisher = min(fisher(p.c)$p, fisher(p.v)$p),
-       invchisq = min(invchisq(p.c)$p, invchisq(p.v)$p),
-       stouffer = min(stouffer(p.c)$p, stouffer(p.v)$p))
+  list(tippet = min(tippett(p.c)$p, tippett(p.f)$p),
+       fisher = min(fisher(p.c)$p, fisher(p.f)$p),
+       invchisq = min(invchisq(p.c)$p, invchisq(p.f)$p),
+       stouffer = min(stouffer(p.c)$p, stouffer(p.f)$p))
 }
