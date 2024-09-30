@@ -75,7 +75,7 @@ def get_alpha(XA, XB, same_indices, change_indices):
     return output[0]
 
 
-def get_p_value(XA, XB, same_indices, change_indices, repetition=1):
+def get_p_value(XA, XB, same_indices, change_indices, checker='checker_v4', repetition=1):
     pandas2ri.activate()
     numpy2ri.activate()
     # Convert Python lists or arrays to numpy arrays and ensure they are C-contiguous
@@ -88,7 +88,7 @@ def get_p_value(XA, XB, same_indices, change_indices, repetition=1):
 
     # Source your R code
     robjects.r.source('R_codes/Libraray.R')
-    r_func = robjects.globalenv['checker_v3']
+    r_func = robjects.globalenv[checker]
 
     # Convert Python arrays to R matrices
     r_XA = robjects.r.matrix(XA, nrow=XA.shape[0], ncol=XA.shape[1])
