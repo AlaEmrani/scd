@@ -88,7 +88,7 @@ def get_p_value(XA, XB, same_indices, change_indices, repetition=1):
 
     # Source your R code
     robjects.r.source('R_codes/Libraray.R')
-    r_func = robjects.globalenv['checker_v2']
+    r_func = robjects.globalenv['checker_v3']
 
     # Convert Python arrays to R matrices
     r_XA = robjects.r.matrix(XA, nrow=XA.shape[0], ncol=XA.shape[1])
