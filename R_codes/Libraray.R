@@ -435,3 +435,69 @@ checker_v3 <- function(SA, SB, same_indices, change_indices, repetition=1) {
        invchisq = min(invchisq(p.c)$p, invchisq(p.f)$p),
        stouffer = min(stouffer(p.c)$p, stouffer(p.f)$p))
 }
+
+checker_v4 <- function(SA, SB, same_indices, change_indices, repetition=1) {
+  same_indices = same_indices + 1
+  change_indices = change_indices + 1
+  nA <- nrow(SA)
+  nB <- nrow(SB)
+  d <- ncol(SA)
+ 
+  same_length <- length(same_indices)
+  change_length <- length(change_indices)
+  repetition <- repetition*same_length
+ 
+  p.c <- NULL
+  p.f <- NULL
+  for(i in 1:repetition){
+    c <- matrix(rnorm(same_length), ncol = 1)
+   
+    data <- rbind(data.frame(y = SA[, same_indices] %*% c,
+                             X = SA[, change_indices]),
+                  data.frame(y = SB[, same_indices] %*% c,
+                             X = SB[, change_indices]))
+   
+    # Load the strucchange package
+    library(strucchange)
+    library(poolr)
+    # Specify the break point
+    breakpoint <- nA
+   
+    formul <- reformulate(response="y", termlabels=c(colnames(data)[-1], "0"))
+   
+    # Perform the Chow test
+    chow_test <- sctest(formul, type = "Chow", point = breakpoint, data = data)
+
+    OLS_A_residuals <- lm(formula = formul, data = data[1:nA,])$residuals
+    OLS_B_residuals <- lm(formula = formul, data = data[(nA+1):(nA+nB),])$residuals
+    num = (t(OLS_A_residuals) %*% OLS_A_residuals)/(nA-change_length)
+    denom = (t(OLS_B_residuals) %*% OLS_B_residuals)/(nB-change_length)
+    f = num/denom
+    p.v = 1
+    if( f > 1) {
+      p.v = pf(f, df = nA-change_length, df2 = nB-change_length, lower.tail = FALSE) +
+        pf(1/f, df = nA-change_length, df2 = nB-change_length, lower.tail = TRUE)
+    } else {
+      p.v = pf(f, df = nA-change_length, df2 = nB-change_length, lower.tail = TRUE) +
+        pf(1/f, df = nA-change_length, df2 = nB-change_length, lower.tail = FALSE)
+    }
+   
+    p.c <- c(p.c, chow_test$p.value)
+    p.f <- c(p.f, p.v)
+  }
+  # meta analysis methods with p-values
+  # list(p = data.frame(tippet = min(tippett(p.c)$p, tippett(p.f)$p),
+  #      fisher = min(fisher(p.c)$p, fisher(p.f)$p),
+  #      invchisq = min(invchisq(p.c)$p, invchisq(p.f)$p),
+  #      stouffer = min(stouffer(p.c)$p, stouffer(p.f)$p),
+  #      binomtest = min(binomtest(p.c)$p, binomtest(p.f)$p),
+  #      bonferroni = min(bonferroni(p.c)$p, bonferroni(p.f)$p)),
+  #      p.c = p.c,
+  #      p.f = p.f)
+list(tippet = min(tippett(p.c)$p, tippett(p.f)$p),
+     fisher = min(fisher(p.c)$p, fisher(p.f)$p),
+     invchisq = min(invchisq(p.c)$p, invchisq(p.f)$p),
+     bonferroni = min(bonferroni(p.c)$p, bonferroni(p.f)$p),
+     stouffer = min(stouffer(p.c)$p, stouffer(p.f)$p))
+ 
+}
