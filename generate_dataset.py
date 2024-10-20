@@ -3,6 +3,7 @@ from rpy2 import robjects
 from rpy2.robjects import pandas2ri
 from rpy2.robjects import numpy2ri
 from rpy2.robjects.vectors import IntVector
+from rpy2.robjects.vectors import FloatVector
 
 
 # Output sequence is samples_A, precision_matrix_A, covariance_matrix_A,
@@ -103,12 +104,13 @@ def get_p_value(XA, XB, same_indices, change_indices, checker='checker_v4', repe
 
     return output[0], output[1], output[2], output[3]
 
-def DNetFinder(XA, XB, alpha):
+def DNetFinder_Liu2017(XA, XB, alphas, delta_star):
     pandas2ri.activate()
     numpy2ri.activate()
     # Convert Python lists or arrays to numpy arrays and ensure they are C-contiguous
     XA = np.ascontiguousarray(XA)
     XB = np.ascontiguousarray(XB)
+    delta_star = np.ascontiguousarray(delta_star)
   
     # Source your R code
     robjects.r.source('R_codes/Libraray.R')
@@ -117,8 +119,10 @@ def DNetFinder(XA, XB, alpha):
     # Convert Python arrays to R matrices
     r_XA = robjects.r.matrix(XA, nrow=XA.shape[0], ncol=XA.shape[1])
     r_XB = robjects.r.matrix(XB, nrow=XB.shape[0], ncol=XB.shape[1])
+    r_alphas = FloatVector(alphas)
+    r_delta_star = robjects.r.matrix(delta_star, nrow=delta_star.shape[0], ncol=delta_star.shape[1])
   
     # Call the R function
-    output = r_func(r_XA, r_XB, alpha)
+    output = r_func(r_XA, r_XB, r_alphas, r_delta_star)
 
     return output
