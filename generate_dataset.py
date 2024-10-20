@@ -103,7 +103,7 @@ def get_p_value(XA, XB, same_indices, change_indices, checker='checker_v4', repe
 
     return output[0], output[1], output[2], output[3]
 
-def DNetFinder_Liu2017(XA, XB, alpha):
+def DNetFinder(XA, XB, alpha):
     pandas2ri.activate()
     numpy2ri.activate()
     # Convert Python lists or arrays to numpy arrays and ensure they are C-contiguous
@@ -121,4 +121,4 @@ def DNetFinder_Liu2017(XA, XB, alpha):
     # Call the R function
     output = r_func(r_XA, r_XB, alpha)
 
-    return output[0]
+    return output
