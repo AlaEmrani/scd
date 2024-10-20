@@ -500,3 +500,11 @@ list(tippet = min(tippett(p.c)$p, tippett(p.f)$p),
      stouffer = min(stouffer(p.c)$p, stouffer(p.f)$p))
  
 }
+
+DNetFinder_Liu2017 <- function(SA, SB, alpha){
+  library(DNetFinder)
+  est_coefGGM1=lassoGGM(SA)
+  est_coefGGM2=lassoGGM(SB)
+  est_DNGGM=DNetGGM(SA,SB,est_coefGGM1,est_coefGGM2,alpha=0.93)
+  est_DNGGM
+}
