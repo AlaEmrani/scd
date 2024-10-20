@@ -512,6 +512,9 @@ DNetFinder_Liu2017 <- function(SA, SB, alphas, delta_star){
     realDiffSupport <- delta_star[upper.tri(delta_star)]
     estimatedDiffSupport <- est_DNGGM[upper.tri(est_DNGGM)]
 
+    realDiffSupport[realDiffSupport != 0] <- 1
+    estimatedDiffSupport[estimatedDiffSupport != 0] <- 1
+
     # support evaluator
     NT <- sum(abs(realDiffSupport) == abs(estimatedDiffSupport))
     NTN <- sum(abs(realDiffSupport) == abs(estimatedDiffSupport) & realDiffSupport == 0)
