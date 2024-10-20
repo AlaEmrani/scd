@@ -103,4 +103,22 @@ def get_p_value(XA, XB, same_indices, change_indices, checker='checker_v4', repe
 
     return output[0], output[1], output[2], output[3]
 
+def DNetFinder_Liu2017(XA, XB, alpha):
+    pandas2ri.activate()
+    numpy2ri.activate()
+    # Convert Python lists or arrays to numpy arrays and ensure they are C-contiguous
+    XA = np.ascontiguousarray(XA)
+    XB = np.ascontiguousarray(XB)
+  
+    # Source your R code
+    robjects.r.source('R_codes/Libraray.R')
+    r_func = robjects.globalenv[DNetFinder_Liu2017]
 
+    # Convert Python arrays to R matrices
+    r_XA = robjects.r.matrix(XA, nrow=XA.shape[0], ncol=XA.shape[1])
+    r_XB = robjects.r.matrix(XB, nrow=XB.shape[0], ncol=XB.shape[1])
+  
+    # Call the R function
+    output = r_func(r_XA, r_XB, alpha)
+
+    return output[0]
