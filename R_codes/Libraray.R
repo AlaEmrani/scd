@@ -501,7 +501,7 @@ list(tippet = min(tippett(p.c)$p, tippett(p.f)$p),
  
 }
 
-DNetFinder_Liu2017 <- function(Samples_A, Samples_B, alphas, delta_star){
+DNetFinder_Liu2017 <- function(SA, SB, alphas, delta_star){
   library(DNetFinder)
   est_coefGGM1=lassoGGM(SA)
   est_coefGGM2=lassoGGM(SB)
