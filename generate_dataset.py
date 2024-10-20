@@ -110,6 +110,7 @@ def DNetFinder_Liu2017(XA, XB, alphas, delta_star):
     # Convert Python lists or arrays to numpy arrays and ensure they are C-contiguous
     XA = np.ascontiguousarray(XA)
     XB = np.ascontiguousarray(XB)
+    alphas = np.ascontiguousarray(alphas)
     delta_star = np.ascontiguousarray(delta_star)
   
     # Source your R code
