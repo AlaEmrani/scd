@@ -115,7 +115,7 @@ def DNetFinder_Liu2017(XA, XB, alphas, delta_star):
   
     # Source your R code
     robjects.r.source('R_codes/Libraray.R')
-    r_func = robjects.globalenv[DNetFinder_Liu2017]
+    r_func = robjects.globalenv['DNetFinder_Liu2017']
 
     # Convert Python arrays to R matrices
     r_XA = robjects.r.matrix(XA, nrow=XA.shape[0], ncol=XA.shape[1])
