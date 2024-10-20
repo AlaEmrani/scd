@@ -501,10 +501,45 @@ list(tippet = min(tippett(p.c)$p, tippett(p.f)$p),
  
 }
 
-DNetFinder_Liu2017 <- function(SA, SB, alpha){
+DNetFinder_Liu2017 <- function(Samples_A, Samples_B, alphas, delta_star){
   library(DNetFinder)
   est_coefGGM1=lassoGGM(SA)
   est_coefGGM2=lassoGGM(SB)
-  est_DNGGM=DNetGGM(SA,SB,est_coefGGM1,est_coefGGM2,alpha)
-  est_DNGGM
+  results <- NULL
+  for(alpha in alphas){
+    est_DNGGM=DNetGGM(SA,SB,est_coefGGM1,est_coefGGM2,alpha)
+    
+    realDiffSupport <- delta_star[upper.tri(delta_star)]
+    estimatedDiffSupport <- est_DNGGM[upper.tri(est_DNGGM)]
+
+    # support evaluator
+    NT <- sum(abs(realDiffSupport) == abs(estimatedDiffSupport))
+    NTN <- sum(abs(realDiffSupport) == abs(estimatedDiffSupport) & realDiffSupport == 0)
+    NTP <- NT - NTN
+    
+    NF <- sum(abs(realDiffSupport) != abs(estimatedDiffSupport))
+    NFP <- sum(abs(realDiffSupport) != abs(estimatedDiffSupport) & realDiffSupport == 0)
+    NFN <- NF - NFP
+    
+    NTPR <- NTP/(NTP+NFN)
+    NFPR <- NFP/(NTN+NFP)
+    
+    NACC <- NT/(NT+NF)
+    
+    NPrecision <- NA
+    if(NTP+NFP > 0)
+      NPrecision <- NTP/(NTP+NFP)
+    NRecall <- NTP/(NTP+NFN)
+    
+    FPR = NFP/(NFP+NTN)
+    TPR = NTP/(NTP+NFN)
+    FDR = 0
+    if(NFP+NTP > 0){
+      FDR = NFP / (NFP+NTP)
+    }
+    
+    results <- rbind(results, data.frame(FPR=FPR, TPR=TPR, FDR=FDR, NPrecision=NPrecision, NRecall=NRecall, alpha=alpha,
+               NTP=NTP, NTN=NTN, NFP=NFP, NFN=NFN, NTPR=NTPR, NFPR=NFPR, NACC=NACC))
+  }
+  results
 }
