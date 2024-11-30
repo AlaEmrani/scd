@@ -593,13 +593,9 @@ DiffNetFDR_Liu2017 <- function(SA, SB, alphas, delta_star){
   n_B = nrow(SB)
   group <- c(rep("A", n_A), rep("B", n_B))
   results <- NULL
-  for(alpha in alphas){
-    tryCatch(
-      expr = {                      
+  for(alpha in alphas){                 
         pcor.test_Liu2017 <- DiffNet.FDR(X, group, alpha, "pcor")
         results <- rbind(results, evaluation(pcor.test_Liu2017$Diff.edge, delta_star))
-      },
-      error = function(e){})
   }
   results
 }
@@ -611,13 +607,9 @@ DiffNetFDR_Xia2015 <- function(SA, SB, alphas, delta_star){
   n_B = nrow(SB)
   group <- c(rep("A", n_A), rep("B", n_B))
   results <- NULL
-  for(alpha in alphas){
-    tryCatch(
-      expr = {                      
+  for(alpha in alphas){                  
         pmat.test_Xia2015 <- DiffNet.FDR(X, group, alpha, "pmat")
         results <- rbind(results, evaluation(pmat.test_Xia2015$Diff.edge, delta_star))
-      },
-      error = function(e){})
   }
   results
 }
