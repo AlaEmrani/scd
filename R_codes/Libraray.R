@@ -548,7 +548,7 @@ DNetFinder_Liu2017 <- function(SA, SB, alphas, delta_star){
 }
 
 
-evaluation <- function(estimatedDiffSupport, realDiffSupport) {
+evaluation <- function(estimatedDiffSupport, realDiffSupport, alpha) {
   realDiffSupport = abs(sign(realDiffSupport))
   estimatedDiffSupport = abs(sign(estimatedDiffSupport))
   
@@ -595,7 +595,7 @@ DiffNetFDR_Liu2017 <- function(SA, SB, alphas, delta_star){
   results <- NULL
   for(alpha in alphas){                 
         pcor.test_Liu2017 <- DiffNet.FDR(X, group, alpha, "pcor")
-        results <- rbind(results, evaluation(pcor.test_Liu2017$Diff.edge, delta_star))
+        results <- rbind(results, evaluation(pcor.test_Liu2017$Diff.edge, delta_star, alpha))
   }
   results
 }
@@ -609,7 +609,7 @@ DiffNetFDR_Xia2015 <- function(SA, SB, alphas, delta_star){
   results <- NULL
   for(alpha in alphas){                  
         pmat.test_Xia2015 <- DiffNet.FDR(X, group, alpha, "pmat")
-        results <- rbind(results, evaluation(pmat.test_Xia2015$Diff.edge, delta_star))
+        results <- rbind(results, evaluation(pmat.test_Xia2015$Diff.edge, delta_star, alpha))
   }
   results
 }
