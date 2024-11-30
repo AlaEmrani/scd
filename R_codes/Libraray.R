@@ -546,3 +546,74 @@ DNetFinder_Liu2017 <- function(SA, SB, alphas, delta_star){
   }
   results
 }
+
+
+evaluation <- function(estimatedDiffSupport, realDiffSupport) {
+  realDiffSupport = abs(sign(realDiffSupport))
+  estimatedDiffSupport = abs(sign(estimatedDiffSupport))
+  
+  realDiffSupport <- realDiffSupport[upper.tri(realDiffSupport)]
+  estimatedDiffSupport <- estimatedDiffSupport[upper.tri(estimatedDiffSupport)]
+  
+  # support evaluator
+  NT <- sum(abs(realDiffSupport) == abs(estimatedDiffSupport))
+  NTN <- sum(abs(realDiffSupport) == abs(estimatedDiffSupport) & realDiffSupport == 0)
+  NTP <- NT - NTN
+  
+  NF <- sum(abs(realDiffSupport) != abs(estimatedDiffSupport))
+  NFP <- sum(abs(realDiffSupport) != abs(estimatedDiffSupport) & realDiffSupport == 0)
+  NFN <- NF - NFP
+  
+  NTPR <- NTP/(NTP+NFN)
+  NFPR <- NFP/(NTN+NFP)
+  
+  NACC <- NT/(NT+NF)
+  
+  NPrecision <- NA
+  if(NTP+NFP > 0)
+    NPrecision <- NTP/(NTP+NFP)
+  NRecall <- NTP/(NTP+NFN)
+  
+  FPR = NFP/(NFP+NTN)
+  TPR = NTP/(NTP+NFN)
+  FDR = 0
+  if(NFP+NTP > 0){
+    FDR = NFP / (NFP+NTP)
+  }
+  
+  results <- data.frame(FPR=FPR, TPR=TPR, FDR=FDR, NPrecision=NPrecision, NRecall=NRecall, alpha=alpha,
+                        NTP=NTP, NTN=NTN, NFP=NFP, NFN=NFN, NTPR=NTPR, NFPR=NFPR, NACC=NACC)
+  results
+}
+
+DiffNetFDR_Liu2017 <- function(SA, SB, alphas, delta_star){
+  library(DiffNetFDR)
+  X <- rbind(SA, SB)
+  group <- c(rep("A", n), rep("B", n))
+  results <- NULL
+  for(alpha in alphas){
+    tryCatch(
+      expr = {                      
+        pcor.test_Liu2017 <- DiffNet.FDR(X, group, alpha, "pcor")
+        results <- rbind(results, evaluation(pcor.test_Liu2017$Diff.edge, delta_star))
+      },
+      error = function(e){})
+  }
+  results
+}
+
+DiffNetFDR_Xia2015 <- function(SA, SB, alphas, delta_star){
+  library(DiffNetFDR)
+  X <- rbind(SA, SB)
+  group <- c(rep("A", n), rep("B", n))
+  results <- NULL
+  for(alpha in alphas){
+    tryCatch(
+      expr = {                      
+        pmat.test_Xia2015 <- DiffNet.FDR(X, group, alpha, "pmat")
+        results <- rbind(results, evaluation(pmat.test_Xia2015$Diff.edge, delta_star))
+      },
+      error = function(e){})
+  }
+  results
+}
