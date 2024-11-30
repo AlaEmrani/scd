@@ -589,7 +589,9 @@ evaluation <- function(estimatedDiffSupport, realDiffSupport) {
 DiffNetFDR_Liu2017 <- function(SA, SB, alphas, delta_star){
   library(DiffNetFDR)
   X <- rbind(SA, SB)
-  group <- c(rep("A", n), rep("B", n))
+  n_A = nrow(SA)
+  n_B = nrow(SB)
+  group <- c(rep("A", n_A), rep("B", n_B))
   results <- NULL
   for(alpha in alphas){
     tryCatch(
@@ -605,7 +607,9 @@ DiffNetFDR_Liu2017 <- function(SA, SB, alphas, delta_star){
 DiffNetFDR_Xia2015 <- function(SA, SB, alphas, delta_star){
   library(DiffNetFDR)
   X <- rbind(SA, SB)
-  group <- c(rep("A", n), rep("B", n))
+  n_A = nrow(SA)
+  n_B = nrow(SB)
+  group <- c(rep("A", n_A), rep("B", n_B))
   results <- NULL
   for(alpha in alphas){
     tryCatch(
