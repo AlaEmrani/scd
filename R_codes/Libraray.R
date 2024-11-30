@@ -154,7 +154,7 @@ generate_reference_models <- function(number_of_nodes, number_of_samples, number
   # create structure
   if(type == "Full") {
     A <- A*matrix(1, nrow = number_of_nodes, ncol = number_of_nodes)
-    B <- B*(matrix(1, nrow = number_of_nodes, ncol = number_of_nodes)+changeMask)
+    B <- B*(matrix(1, nrow = number_of_nodes, ncol = number_of_nodes)+change_mask)
   } else if(type == "ScaleFree") {
     g <- barabasi.game(number_of_nodes, power, directed = F);
     graph_matrix <- as_adjacency_matrix(g, sparse = F);
