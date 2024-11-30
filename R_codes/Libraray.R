@@ -116,9 +116,9 @@ fisher_test <- function(all_genes, hub_genes, functional_genes) {
 library("GGMselect")
 library("igraph")
 # create two complete precision matrix
-generate_reference_models <- function(number_of_nodes, number_of_samples,
+generate_reference_models <- function(number_of_nodes, number_of_samples, number_of_changes,
                                       type="ScaleFree", density_of_graph = 0.2,
-                                      power = 1, number_of_changes, mult=1)
+                                      power = 1, mult=1)
 {
   #######################################
   ########### Generate Model ############
