@@ -152,7 +152,10 @@ generate_reference_models <- function(number_of_nodes, number_of_samples,
   change_mask[change_mask %in% mask] <- -1
   change_mask[change_mask != -1] <- 0
   # create structure
-  if(type == "ScaleFree") {
+  if(type == "Full") {
+    A <- A*matrix(1, nrow = numberOfNodes, ncol = numberOfNodes)
+    B <- B*(matrix(1, nrow = numberOfNodes, ncol = numberOfNodes)+changeMask)
+  } else if(type == "ScaleFree") {
     g <- barabasi.game(number_of_nodes, power, directed = F);
     graph_matrix <- as_adjacency_matrix(g, sparse = F);
     A <- A*graph_matrix;
@@ -297,6 +300,36 @@ aggregate_dtrace_solution_path_resuts <- function(number_of_repetition,
 base_differential_network <- function(numberOfNodes, numberOfSamples=1, numberOfChanges=1,
                                       decay_value = 0.3) {
   SB = SA = matrix(0, nrow = numberOfNodes, ncol = numberOfNodes)
+
+
+  # zero matrix generation
+  A <- matrix(rep(0,numberOfNodes*numberOfNodes), nrow=numberOfNodes);
+  B <- matrix(rep(0,numberOfNodes*numberOfNodes), nrow=numberOfNodes);
+  totalPossibleEdges <- choose(numberOfNodes, 2);
+  
+  # create common model
+  randomWeights <- rnorm(totalPossibleEdges, sd = mult);
+  randomWeights <- randomWeights + mult*sign(randomWeights);
+  
+  
+  # define base of precision matrix
+  A[lower.tri(A)] <- randomWeights;
+  A <- t(A)
+  A[lower.tri(A)] <- randomWeights;
+  
+  B <- A;
+  
+  
+  changeMask <- matrix(data = 0, nrow = numberOfNodes, ncol = numberOfNodes)
+  indexes <- 1:choose(numberOfNodes,2)
+  changeMask[lower.tri(changeMask)] <- indexes
+  changeMask <- t(changeMask)
+  changeMask[lower.tri(changeMask)] <- indexes
+  mask <- sample(indexes,numberOfChanges)
+  changeMask[changeMask %in% mask] <- -1
+  changeMask[changeMask != -1] <- 0
+
+  
 
   for(i in 1:numberOfNodes){
       for(j in 1:numberOfNodes){
