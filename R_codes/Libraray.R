@@ -294,18 +294,18 @@ aggregate_dtrace_solution_path_resuts <- function(number_of_repetition,
   mean_dtrace_solution_path_performances
 }
 
-base_differential_network <- function(numberOfNodes, numberOfSamples=1,
-                                      decay_ratio = 0.3,
-                                      alternative_value = 0.3,
-                                      alternate_diag_index = 2) {
+base_differential_network <- function(numberOfNodes, numberOfSamples=1, numberOfChanges=1,
+                                      decay_value = 0.3) {
   SB = SA = matrix(0, nrow = numberOfNodes, ncol = numberOfNodes)
-  for (i in 1:numberOfNodes) {
-    for (j in 1:numberOfNodes) {
-      SB[i,j] = SA[i,j] = decay_ratio^(abs(i-j))
-      if(floor(numberOfNodes/alternate_diag_index) == abs(i-j))
-        SB[i,j] = alternative_value
+
+  for(i in 1:numberOfNodes){
+      for(j in 1:numberOfNodes){
+        SB[i,j] <- SA[i,j] <- decay_value^(abs(i-j))
+      }
     }
-  }
+    for(i in 1:numberOfChanges){
+      SB[i, numberOfNodes-numberOfChanges+i] <- SB[numberOfNodes-numberOfChanges+i, i] <- decay_value
+    }
     covarianceMatrixA <- solve(SA);
     XA <- rmvnorm(numberOfSamples, mean=rep(0,numberOfNodes), sigma=covarianceMatrixA);
 
