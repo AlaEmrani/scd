@@ -19,12 +19,12 @@ def generate_reference_models(number_of_nodes, number_of_samples, number_of_chan
     return samples_A, precision_mat_A, cov_mat_A, samples_B, precision_mat_B, cov_mat_B
 
 
-def base_differential_network(number_of_nodes, number_of_samples=1, decay_ratio = 0.3, alternative_value = 0.3,
-                              alternate_diag_index = 1.1):
+def base_differential_network(number_of_nodes, number_of_samples=1, numberOfChanges=1,
+                                      decay_value = 0.3):
     pandas2ri.activate()
     robjects.r.source('R_codes/Libraray.R')
     r_func = robjects.globalenv['base_differential_network']
-    output = r_func(number_of_nodes, number_of_samples, decay_ratio, alternative_value, alternate_diag_index)
+    output = r_func(number_of_nodes, number_of_samples, numberOfChanges, decay_value)
     samples_A, precision_mat_A, cov_mat_A = np.array(output[0]), np.array(output[1]), np.array(output[2])
     samples_B, precision_mat_B, cov_mat_B = np.array(output[3]), np.array(output[4]), np.array(output[5])
     return samples_A, precision_mat_A, cov_mat_A, samples_B, precision_mat_B, cov_mat_B
@@ -116,6 +116,56 @@ def DNetFinder_Liu2017(XA, XB, alphas, delta_star):
     # Source your R code
     robjects.r.source('R_codes/Libraray.R')
     r_func = robjects.globalenv['DNetFinder_Liu2017']
+
+    # Convert Python arrays to R matrices
+    r_XA = robjects.r.matrix(XA, nrow=XA.shape[0], ncol=XA.shape[1])
+    r_XB = robjects.r.matrix(XB, nrow=XB.shape[0], ncol=XB.shape[1])
+    r_alphas = FloatVector(alphas)
+    r_delta_star = robjects.r.matrix(delta_star, nrow=delta_star.shape[0], ncol=delta_star.shape[1])
+  
+    # Call the R function
+    output = r_func(r_XA, r_XB, r_alphas, r_delta_star)
+
+    return output
+
+
+def DiffNetFDR_Liu2017(XA, XB, alphas, delta_star):
+    pandas2ri.activate()
+    numpy2ri.activate()
+    # Convert Python lists or arrays to numpy arrays and ensure they are C-contiguous
+    XA = np.ascontiguousarray(XA)
+    XB = np.ascontiguousarray(XB)
+    alphas = np.ascontiguousarray(alphas)
+    delta_star = np.ascontiguousarray(delta_star)
+  
+    # Source your R code
+    robjects.r.source('R_codes/Libraray.R')
+    r_func = robjects.globalenv['DiffNetFDR_Liu2017']
+
+    # Convert Python arrays to R matrices
+    r_XA = robjects.r.matrix(XA, nrow=XA.shape[0], ncol=XA.shape[1])
+    r_XB = robjects.r.matrix(XB, nrow=XB.shape[0], ncol=XB.shape[1])
+    r_alphas = FloatVector(alphas)
+    r_delta_star = robjects.r.matrix(delta_star, nrow=delta_star.shape[0], ncol=delta_star.shape[1])
+  
+    # Call the R function
+    output = r_func(r_XA, r_XB, r_alphas, r_delta_star)
+
+    return output
+
+
+def DiffNetFDR_Xia2015(XA, XB, alphas, delta_star):
+    pandas2ri.activate()
+    numpy2ri.activate()
+    # Convert Python lists or arrays to numpy arrays and ensure they are C-contiguous
+    XA = np.ascontiguousarray(XA)
+    XB = np.ascontiguousarray(XB)
+    alphas = np.ascontiguousarray(alphas)
+    delta_star = np.ascontiguousarray(delta_star)
+  
+    # Source your R code
+    robjects.r.source('R_codes/Libraray.R')
+    r_func = robjects.globalenv['DiffNetFDR_Xia2015']
 
     # Convert Python arrays to R matrices
     r_XA = robjects.r.matrix(XA, nrow=XA.shape[0], ncol=XA.shape[1])
